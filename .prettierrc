@@ -4,5 +4,6 @@
   "tabs": true,
   "singleQuote": true,
   "jsxSingleQuote": true,
-  "bracketSameLine": true
+  "bracketSameLine": true,
+  "endOfLine": "auto"
 }

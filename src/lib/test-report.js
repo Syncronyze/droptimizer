@@ -1,4 +1,4 @@
-export default {
+export default test = {
     "version": "1027-01",
     "report_version": "2.0.0",
     "ptr_enabled": 1,
