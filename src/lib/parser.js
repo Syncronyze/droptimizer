@@ -1,7 +1,7 @@
 'use client';
 import { itemSubTypes, itemClasses } from "@lib/enums";
 
-import testReport from "./test-report";
+import testReport from "/dev/test-report";
 
 export const parse = (json, rules) => {
     json = testReport;
