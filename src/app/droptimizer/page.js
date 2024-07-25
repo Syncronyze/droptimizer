@@ -1,19 +1,20 @@
-'use client';
-import Instance from '@components/instance';
-import { parse } from '@lib/parser';
-import { getData } from '@lib/queries';
-import { useEffect } from 'react';
+import React from 'react';
+import BossNav from '@components/custom/boss-nav';
+import ItemTable from '@components/custom/item-table';
+import InstanceNav from '@components/custom/instance-nav';
 
-export default function Droptimizer() {
-    useEffect(() => {
-        const data = parse();
-        console.log(data);
-        getData();
-    }, []);
-
+export default function Dashboard() {
     return (
-        <main className='flex min-h-screen flex-col items-center justify-between p-24 bg-slate-900'>
-            <div className='' />
-        </main>
+        <div className='w-[72rem] m-auto py-16 h-full min-h-min min-w-min'>
+            <div className='flex flex-row border rounded-md h-full'>
+                <div className='min-w-fit border-r bg-muted/40'>
+                    <div className='flex w-fit h-full max-h-screen flex-col'>
+                        <InstanceNav />
+                        <BossNav />
+                    </div>
+                </div>
+                <ItemTable />
+            </div>
+        </div>
     );
 }

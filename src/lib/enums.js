@@ -1,13 +1,13 @@
 export const itemClasses = [
-    'Consumable', 
-    'Container', 
-    'Weapon', 
-    'Gem', 
-    'Armor', 
-    'Reagent', 
-    'Projectile', 
-    'Tradegoods', 
-    'ItemEnhancement', 
+    'Consumable',
+    'Container',
+    'Weapon',
+    'Gem',
+    'Armor',
+    'Reagent',
+    'Projectile',
+    'Tradegoods',
+    'ItemEnhancement',
     'Recipe',
     'CurrencyTokenObsolete',
     'Quiver',
@@ -22,7 +22,7 @@ export const itemClasses = [
 ];
 
 export const itemSubTypes = {
-    'Weapon': [
+    Weapon: [
         'Axe 1H',
         'Axe 2H',
         'Bows',
@@ -43,23 +43,11 @@ export const itemSubTypes = {
         'Obsolete3',
         'Crossbow',
         'Wand',
-        'Fishingpole'
+        'Fishingpole',
     ],
-    'Armor': [
-        'Misc',
-        'Cloth',
-        'Leather',
-        'Mail',
-        'Plate',
-        'Cosmetic',
-        'Shield'
-    ],
-    'Reagent': [
-        'Reagent',
-        'Keystone',
-        'ContextToken',
-    ],
-    'Miscellaneous': [
+    Armor: ['Misc', 'Cloth', 'Leather', 'Mail', 'Plate', 'Cosmetic', 'Shield'],
+    Reagent: ['Reagent', 'Keystone', 'ContextToken'],
+    Miscellaneous: [
         'Junk',
         'Reagent',
         'CompanionPet',
@@ -67,5 +55,5 @@ export const itemSubTypes = {
         'Other',
         'Mount',
         'MountEquipment',
-    ]
-}
+    ],
+};

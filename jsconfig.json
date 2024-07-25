@@ -1,8 +1,8 @@
 {
-  "compilerOptions": {
-    "paths": {
-      "@*": ["./src/*"],
-      "@tables": ["./drizzle/schema.ts"]
+    "compilerOptions": {
+        "paths": {
+            "@*": ["./src/*"],
+            "@tables": ["./drizzle/schema.ts"]
+        }
     }
-  }
 }
