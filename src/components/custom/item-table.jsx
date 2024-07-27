@@ -364,7 +364,7 @@ const headerClasses =
 
 export default function ItemTable() {
     return (
-        <Tabs className='flex grow flex-col m-4' defaultValue='all'>
+        <Tabs className='flex grow flex-col m-2 gap-y-2' defaultValue='all'>
             <div className='flex items-center'>
                 <TabsList>
                     {difficulties.map((difficulty) => (
@@ -380,7 +380,7 @@ export default function ItemTable() {
                     </Button>
                 </div>
             </div>
-            <div className='flex flex-col min-h-0 ring-1 ring-neutral-800 rounded-md m-2'>
+            <div className='flex flex-col min-h-0 ring-1 ring-neutral-800 rounded-md '>
                 <div className='grid grid-cols-12 border-b pr-4'>
                     <div className={`col-span-7 ${headerClasses}`}>
                         <a href='#' className='flex flex-row items-center px-4 cursor-default'>
@@ -393,7 +393,9 @@ export default function ItemTable() {
                         <span className='sr-only'>Expand</span>
                     </div>
                 </div>
-                <div className={`flex flex-auto flex-col overflow-auto ${scrollClasses}`}>
+                <div
+                    className={`flex flex-auto flex-col overflow-auto rounded-b-md ${scrollClasses}`}
+                >
                     {items.map((item) => (
                         <ItemRow key={item.id} item={item} />
                     ))}

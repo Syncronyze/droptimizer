@@ -76,25 +76,36 @@ const itemCharacterDPS = [
     },
 ];
 
-const CharacterRow = ({ character }) => (
-    <>
-        <thead className='ring-1 ring-neutral-700 bg-muted'>
-            <tr className='text-center font-bold text-muted-foreground'>
-                <td className={`${textClassColors[character.class.toLowerCase()]}`}>
-                    {character.name}
-                </td>
-                <td>BIS Upgrade %</td>
-                <td>BIS Gain</td>
-                <td>Upgrade %</td>
-                <td>DPS Gain</td>
-            </tr>
-        </thead>
-        <tbody>
+const CharacterRow = ({ character, showTitles }) => (
+    <div className='flex flex-col'>
+        <div className='grid grid-cols-6 text-right bg-muted border-x border-neutral-800 font-bold text-muted-foreground'>
+            <div
+                className={`text-left pl-4 col-span-2 ${textClassColors[character.class.toLowerCase()]}`}
+            >
+                {character.name}-{character.server}
+            </div>
+            {showTitles ? (
+                <>
+                    <div>BIS Upgrade %</div>
+                    <div>BIS Gain</div>
+                    <div>DPS Gain</div>
+                    <div className='pr-4'>Upgrade %</div>
+                </>
+            ) : (
+                <>
+                    <div />
+                    <div />
+                    <div />
+                    <div />
+                </>
+            )}
+        </div>
+        <div>
             {character.spec_dps.map((spec) => (
                 <SpecRow key={`${character.name}-${character.server}-${spec.spec}`} spec={spec} />
             ))}
-        </tbody>
-    </>
+        </div>
+    </div>
 );
 
 const SpecRow = ({ spec }) => {
@@ -110,8 +121,8 @@ const SpecRow = ({ spec }) => {
     }
 
     return (
-        <tr className='border-b hover:bg-muted/50'>
-            <td className='capitalize px-4 py-1'>
+        <div className='grid grid-cols-6 border-b bg-neutral-900 hover:bg-muted/50 items-center px-4'>
+            <div className='col-span-2 capitalize py-1'>
                 <div className='flex flex-row'>
                     <div className='w-6 h-6'>
                         <Image
@@ -119,40 +130,31 @@ const SpecRow = ({ spec }) => {
                             width='0'
                             height='0'
                             sizes='100vw'
-                            className='w-full h-auto rounded-full'
+                            className='w-full h-auto rounded-full border-2'
                             src={`https://wow.zamimg.com/images/wow/icons/large/${spec.icon}.jpg`}
                         />
                     </div>
-                    <span className='font-semibold px-4'>{spec.spec}</span>
+                    <span className='font-semibold pl-2'>{spec.spec}</span>
                 </div>
-            </td>
-            <td className='px-4'>
-                <DPSDisplay dps={pctRelDiff} percent />
-            </td>
-            <td>
-                <DPSDisplay dps={rawRelDiff} />
-            </td>
-            <td>
-                <DPSDisplay dps={pctDiff} percent />
-            </td>
-            <td>
-                <DPSDisplay dps={rawDiff} icon />
-            </td>
-        </tr>
+            </div>
+            <DPSDisplay dps={pctRelDiff} percent />
+            <DPSDisplay dps={rawRelDiff} />
+            <DPSDisplay dps={rawDiff} />
+            <DPSDisplay dps={pctDiff} percent icon doubleIcon={isBIS} />
+        </div>
     );
 };
 
 export default function ItemDetails({ item }) {
     return (
-        <div className='p-2 border-b'>
-            <table className='w-full'>
-                {itemCharacterDPS.map((character) => (
-                    <CharacterRow
-                        key={`${character.name}-${character.server}`}
-                        character={character}
-                    />
-                ))}
-            </table>
+        <div>
+            {itemCharacterDPS.map((character, i) => (
+                <CharacterRow
+                    key={`${character.name}-${character.server}`}
+                    character={character}
+                    showTitles={i === 0}
+                />
+            ))}
         </div>
     );
 }

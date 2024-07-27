@@ -1,15 +1,26 @@
 import React from 'react';
-import { ChevronsDown, ChevronsUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronsDown, ChevronsUp } from 'lucide-react';
 
 const formatter = new Intl.NumberFormat();
 
-export default function DPSDisplay({ dps, icon, percent }) {
-    const directionIcon =
-        dps > 0 ? (
-            <ChevronsUp className='text-green-500' />
+const getIcon = (dps, doubleIcon) => {
+    if (dps >= 0) {
+        return doubleIcon ? (
+            <ChevronsUp className='mx-1 text-green-500' />
         ) : (
-            <ChevronsDown className='text-red-500' />
+            <ChevronUp className='mx-1 text-green-500' />
         );
+    }
+
+    return doubleIcon ? (
+        <ChevronsDown className='mx-1 text-red-500' />
+    ) : (
+        <ChevronDown className='mx-1 text-red-500' />
+    );
+};
+
+export default function DPSDisplay({ dps, icon, doubleIcon, percent }) {
+    const directionIcon = icon ? getIcon(dps, doubleIcon) : null;
 
     let formattedDPS;
     if (percent) {

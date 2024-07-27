@@ -13,7 +13,7 @@ export default function ItemRow({ item }) {
         <Collapsible asChild onOpenChange={setOpen}>
             <>
                 <CollapsibleTrigger asChild>
-                    <div className='grid grid-cols-12 cursor-pointer p-2 bg-neutral-950 hover:bg-muted/50 items-center border-b'>
+                    <div className='grid grid-cols-12 cursor-pointer p-2 bg-neutral-950 hover:bg-muted/30 items-center border-b'>
                         <div className='col-span-7'>
                             <a
                                 href='#'
@@ -45,7 +45,7 @@ export default function ItemRow({ item }) {
                         </div>
                     </div>
                 </CollapsibleTrigger>
-                <CollapsibleContent className='transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down'>
+                <CollapsibleContent className='bg-muted/50 transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down'>
                     <ItemDetails />
                 </CollapsibleContent>
             </>

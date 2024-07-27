@@ -1,3 +1,4 @@
+import { scrollClasses } from '@utils/css-utils';
 import Image from 'next/image';
 import React from 'react';
 
@@ -70,7 +71,7 @@ const encounters = [
 
 export default function BossNav() {
     return (
-        <nav className='flex flex-col text-sm font-medium border-t my-2'>
+        <nav className={`flex flex-auto flex-col overflow-auto border-t ${scrollClasses}`}>
             {encounters.map((encounter) => (
                 <div
                     key={encounter.id}
@@ -85,7 +86,9 @@ export default function BossNav() {
                         alt={encounter.name}
                         src={`https://www.raidbots.com/static/images/EncounterJournal/orig/${encounter.icon}.png`}
                     />
-                    <span>{encounter.name}</span>
+                    <span className='text-sm overflow-hidden text-ellipsis font-semibold'>
+                        {encounter.name}
+                    </span>
                 </div>
             ))}
         </nav>

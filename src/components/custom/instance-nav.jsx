@@ -38,8 +38,8 @@ export default function InstanceNav() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className='flex flex-row justify-between items-center text-xl font-semibold bg-transparent hover:bg-neutral-800 text-white select-none p-2 m-2 rounded-md text-nowrap'>
-                    <span className='px-2 w-72 overflow-hidden text-ellipsis'>
+                <button className='flex flex-row justify-between items-center text-xl font-semibold bg-transparent hover:bg-neutral-800 text-white select-none p-1 m-1 rounded-md text-nowrap'>
+                    <span className='px-2 text-base overflow-hidden text-ellipsis'>
                         Aberrus, the Shadowed Crucible
                     </span>
                     <ChevronDownIcon className='mt-1 h-6 w-6' />

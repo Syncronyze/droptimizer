@@ -11,7 +11,7 @@ export const parse = (json, rules) => {
     //     return invalid;
     // }
 
-    const character = getCharacter(simbot.meta);
+    const character = getCharacter(simbot);
     const report = getReport(simbot);
     const { instances, encounters } = getInstances(simbot.meta);
     const { items, encounterItems } = getItems(simbot.meta);
@@ -40,12 +40,13 @@ const isInvalid = (meta, rules) => {
     return ret.length > 1 ? ret : false;
 };
 
-const getCharacter = (meta) => {
+const getCharacter = (simbot) => {
+    const meta = simbot.meta;
     const data = meta.rawFormData;
     return {
         name: data.armory.name,
         server: data.armory.realm,
-        class_id: data.class,
+        class: simbot.charClass,
     };
 };
 
@@ -54,8 +55,9 @@ const getReport = (simbot) => {
     const firstItemUpgrade = simbot.meta.itemLibrary[0].upgrade;
     return {
         id: simbot.simId,
-        instance_id: formData.droptimizer.instance,
+        url: 'https://www.raidbots.com/simbot/report/vNuZ7NnKB2SuqGRhu87dnk',
         difficulty: formData.droptimizer.difficulty,
+        spec_id: formData.droptimizer.specId,
         date: new Date(simbot.date).toLocaleString('en-US', { timeZone: 'America/Chicago' }),
         avg_ilvl: formData.character.items.averageItemLevel,
         avg_ilvl_equip: formData.character.items.averageItemLevelEquipped,
