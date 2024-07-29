@@ -1,10 +1,7 @@
 'use client';
 import { itemSubTypes, itemClasses } from '@lib/enums';
 
-import testReport from '/dev/test-report';
-
 export const parse = (json, rules) => {
-    json = testReport;
     const simbot = json.simbot;
     // const invalid = isInvalid(simbot.meta, rules);
     // if (invalid) {
@@ -13,10 +10,11 @@ export const parse = (json, rules) => {
 
     const character = getCharacter(simbot);
     const report = getReport(simbot);
+    report.dps = json.sim.players[0].collected_data.dps.mean
     const { instances, encounters } = getInstances(simbot.meta);
     const { items, encounterItems } = getItems(simbot.meta);
 
-    const reportItems = getReportItems(json.sim, report.id);
+    const reportItems = getReportItems(json.sim);
 
     return {
         character,
@@ -54,9 +52,7 @@ const getReport = (simbot) => {
     const formData = simbot.meta.rawFormData;
     const firstItemUpgrade = simbot.meta.itemLibrary[0].upgrade;
     return {
-        id: simbot.simId,
-        url: 'https://www.raidbots.com/simbot/report/vNuZ7NnKB2SuqGRhu87dnk',
-        difficulty: formData.droptimizer.difficulty,
+        difficulty: getDifficulty(formData.droptimizer.difficulty),
         spec_id: formData.droptimizer.specId,
         date: new Date(simbot.date).toLocaleString('en-US', { timeZone: 'America/Chicago' }),
         avg_ilvl: formData.character.items.averageItemLevel,
@@ -67,19 +63,25 @@ const getReport = (simbot) => {
     };
 };
 
-const getReportItems = (sim, report_id) => {
+const getReportItems = (sim) => {
     const results = sim.profilesets.results.reduce((acc, r) => {
-        const item_id = r.name.split('/')[3];
+        // "1200/2486/raid-mythic-fated/194301/525/0/trinket1/"
+        // "instanceId/encounterId/difficulty/encounterItems[].id/itemLevel/enchant/slot"
+        const itemProps = r.name.split('/');
+        const itemID = itemProps[3];
+        let itemSlot = itemProps.at(-2);
+        if (isItemRingOrTrinket(itemSlot)) itemSlot = itemSlot.slice(0, -1);
+        const itemKey = `${itemID}${itemSlot}`;
         // already exists, more DPS.
-        if (acc?.[item_id]?.dps > r.mean) {
+        if (acc?.[itemKey]?.dps > r.mean) {
             return acc;
         }
 
         return {
             ...acc,
-            [item_id]: {
-                item_id: r.name.split('/')[3],
-                report_id,
+            [itemKey]: {
+                item_id: itemID,
+                item_slot: itemSlot,
                 dps: r.mean,
             },
         };
@@ -121,47 +123,52 @@ const getItems = (meta) => {
 
             acc.items[itemKey] = {
                 id: item.item.id,
+                slot: itemSlot,
                 icon: item.item.icon,
                 name: item.item.name,
-                slot: itemSlot,
                 type: itemClass ?? 'Unknown',
                 subtype: itemSubTypes[itemClass]?.[item.item.itemSubClass] ?? 'Unknown',
             };
+
             acc.encounterItems = {
                 ...acc.encounterItems,
                 ...item.item.sources.reduce(
                     (acc, i) => ({
                         ...acc,
-                        [`${i.encounterId}${item.item.id}`]: {
+                        [`${i.encounterId}${itemKey}`]: {
                             encounter_id: i.encounterId,
                             item_id: item.item.id,
+                            item_slot: itemSlot,
                         },
                     }),
                     {},
                 ),
             };
+
             if (item.item.sourceItem) {
                 const sourceItem = item.item.sourceItem;
                 const sourceItemClass = itemClasses[sourceItem.itemClass];
                 const sourceItemKey = `${sourceItem.id}${itemSlot}`;
                 acc.items[sourceItemKey] = {
                     id: sourceItem.id,
+                    slot: itemSlot,
                     name: sourceItem.name,
                     icon: sourceItem.icon,
-                    slot: itemSlot,
                     type: sourceItemClass ?? 'Unknown',
                     subtype: itemSubTypes[sourceItemClass]?.[sourceItem.itemSubClass] ?? 'Unknown',
                 };
 
                 acc.items[itemKey]['source_item_id'] = sourceItem.id;
+                acc.items[itemKey]['source_item_slot'] = itemSlot;
                 acc.encounterItems = {
                     ...acc.encounterItems,
                     ...sourceItem.sources.reduce(
                         (acc, i) => ({
                             ...acc,
-                            [`${i.encounterId}${sourceItem.id}`]: {
+                            [`${i.encounterId}${sourceItemKey}`]: {
                                 encounter_id: i.encounterId,
                                 item_id: sourceItem.id,
+                                item_slot: itemSlot,
                             },
                         }),
                         {},
@@ -180,4 +187,10 @@ const getItems = (meta) => {
 const TRINKET_RING_REGEX = /(trinket|finger).+/;
 const isItemRingOrTrinket = (slot) => {
     return slot.match(TRINKET_RING_REGEX);
+};
+
+const DIFFICULTY_REGEX = /(normal|heroic|mythic)/i;
+const getDifficulty = (difficulty) => {
+    difficulty = difficulty.match(DIFFICULTY_REGEX)[0] || 'error';
+    return difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
 };

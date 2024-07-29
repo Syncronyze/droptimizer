@@ -1,4 +1,8 @@
 module.exports = {
+    env: {
+        es6: true,
+        node: true,
+    },
     extends: [
         'next',
         'next/core-web-vitals',

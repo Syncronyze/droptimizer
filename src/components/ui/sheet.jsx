@@ -1,5 +1,5 @@
 'use client';
-import { cn } from '@lib/utils';
+import { cn } from '@utils/css-utils';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { cva } from 'class-variance-authority';

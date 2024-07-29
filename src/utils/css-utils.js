@@ -1,3 +1,6 @@
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
 export const scrollClasses =
     'scrollbar-thumb-rounded-md scrollbar-track-rounded-md scrollbar-w-2 scrollbar ' +
     'scrollbar-thumb-neutral-600 scrollbar-track-neutral-900';
@@ -17,3 +20,7 @@ export const textClassColors = {
     warlock: 'text-warlock',
     warrior: 'text-warrior',
 };
+
+export function cn(...inputs) {
+    return twMerge(clsx(inputs));
+}
