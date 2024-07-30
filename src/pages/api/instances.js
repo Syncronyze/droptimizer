@@ -1,4 +1,5 @@
-import { supabase } from '@lib/supabase';
+import db from '@db';
+import { instances } from '@tables';
 
 export default async function handler(req, res) {
     if (req.method !== 'GET') {
@@ -18,12 +19,7 @@ export default async function handler(req, res) {
 
 const selectInstances = async () => {
     console.info('Selecting instances');
-    const { data, error } = await supabase.from('instances').select('id, name');
+    const result = await db.select().from(instances);
 
-    if (error)
-        throw new Error(
-            `Could not get instances(s) - ${error.httpStatusCode} ${error.code} ${error.message}`,
-        );
-
-    return data;
+    return result;
 };

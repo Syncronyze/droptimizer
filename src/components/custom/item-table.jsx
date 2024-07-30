@@ -1,5 +1,5 @@
 'use client';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { scrollClasses } from '@utils/css-utils';
 import ItemRow from '@components/custom/item-row';
 import { NavContext } from '@components/custom/nav-context';
@@ -11,19 +11,25 @@ const headerClasses =
     'h-10 px-2 text-left align-middle font-medium text-muted-foreground p-2 hover:bg-muted/50 select-none pointer-default';
 
 export default function ItemTable() {
-    const { selectedEncounter } = useContext(NavContext).navState;
+    const [openedItem, setOpenedItem] = useState(null);
+    const { selectedEncounter, selectedDifficulty } = useContext(NavContext).navState;
     const { data: items, status } = useQuery({
-        queryKey: ['items', selectedEncounter?.id],
+        queryKey: ['items', selectedEncounter?.id, selectedDifficulty?.name],
         queryFn: async () =>
             defaultFetch({
                 endpoint: 'items',
                 method: 'GET',
                 params: {
                     encounter: selectedEncounter.id,
+                    difficulty: selectedDifficulty.name,
                 },
             }),
-        enabled: !!selectedEncounter?.id,
+        enabled: !!selectedEncounter?.id && !!selectedDifficulty?.name,
     });
+
+    const handleOpen = (item) => {
+        setOpenedItem(item);
+    };
 
     if (status === 'loading' || status === 'pending') {
         return (
@@ -56,9 +62,17 @@ export default function ItemTable() {
                     <span className='sr-only'>Expand</span>
                 </div>
             </div>
-            <div className={`flex flex-auto flex-col overflow-auto rounded-b-md ${scrollClasses}`}>
+            <div
+                className={`flex flex-auto flex-col overflow-y-scroll rounded-b-md ${scrollClasses}`}
+            >
                 {items.map((item) => (
-                    <ItemRow key={item.id} item={item} />
+                    <ItemRow
+                        key={`${item.id}${item.is_source_item}`}
+                        item={item}
+                        difficulty={selectedDifficulty}
+                        open={openedItem?.id === item.id}
+                        setOpen={handleOpen}
+                    />
                 ))}
             </div>
         </div>

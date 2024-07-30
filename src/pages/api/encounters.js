@@ -1,4 +1,6 @@
-import { supabase } from '@lib/supabase';
+import db from '@db';
+import { encounters } from '@tables';
+import { eq } from 'drizzle-orm';
 
 export default async function handler(req, res) {
     if (req.method !== 'GET') {
@@ -24,15 +26,7 @@ export default async function handler(req, res) {
 
 const selectEncounters = async (instance) => {
     console.info('Selecting encounters');
-    const { data, error } = await supabase
-        .from('encounters')
-        .select('id, name, icon')
-        .eq('instance_id', instance);
+    const result = await db.select().from(encounters).where(eq(encounters.instance_id, instance));
 
-    if (error)
-        throw new Error(
-            `Could not get encounters(s) - ${error.httpStatusCode} ${error.code} ${error.message}`,
-        );
-
-    return data;
+    return result;
 };

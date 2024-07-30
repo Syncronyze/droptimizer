@@ -29,10 +29,9 @@ export default function AddSimForm() {
         setIsLoading(true);
 
         try {
-            const formData = new FormData(e.currentTarget);
             const response = await fetch('/api/reports', {
                 method: 'POST',
-                body: formData,
+                body: JSON.stringify({ url: value }),
             });
 
             if (!response.ok) {

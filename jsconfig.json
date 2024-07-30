@@ -2,7 +2,8 @@
     "compilerOptions": {
         "paths": {
             "@*": ["./src/*"],
-            "@tables": ["./drizzle/schema.ts"]
+            "@tables": ["./drizzle/schema.js"],
+            "@db": ["./drizzle/db.js"]
         }
     }
 }

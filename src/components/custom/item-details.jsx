@@ -3,84 +3,11 @@ import Image from 'next/image';
 import React from 'react';
 import DPSDisplay from './dps-display';
 
-const itemCharacterDPS = [
-    {
-        name: 'Syncsii',
-        server: 'Illidan',
-        class: 'Druid',
-        spec_dps: [
-            {
-                spec: 'balance',
-                icon: 'spell_nature_starfall',
-                dps_gain: 9027,
-                bis_gain: 14047,
-                max_dps: 500000,
-            },
-            {
-                spec: 'feral',
-                icon: 'ability_druid_catform',
-                dps_gain: 12539,
-                bis_gain: 12539,
-                max_dps: 500000,
-            },
-        ],
-    },
-    {
-        name: 'Snc',
-        server: 'Illidan',
-        class: 'Rogue',
-        spec_dps: [
-            {
-                spec: 'outlaw',
-                icon: 'ability_rogue_waylay',
-                dps_gain: 53636,
-                bis_gain: 53636,
-                max_dps: 500000,
-            },
-            {
-                spec: 'subtlety',
-                icon: 'ability_stealth',
-                dps_gain: -7755,
-                bis_gain: 1681,
-                max_dps: 500000,
-            },
-            {
-                spec: 'assassination',
-                icon: 'ability_rogue_deadlybrew',
-                dps_gain: -11465,
-                bis_gain: 9729,
-                max_dps: 500000,
-            },
-        ],
-    },
-    {
-        name: 'Synks',
-        server: 'Illidan',
-        class: 'Paladin',
-        spec_dps: [
-            {
-                spec: 'retribution',
-                icon: 'paladin_retribution',
-                dps_gain: 15704,
-                bis_gain: 15704,
-                max_dps: 500000,
-            },
-            {
-                spec: 'protection',
-                icon: 'ability_paladin_shieldofthetemplar',
-                dps_gain: -1425,
-                bis_gain: 10136,
-                max_dps: 250000,
-            },
-        ],
-    },
-];
-
 const CharacterRow = ({ character, showTitles }) => (
     <div className='flex flex-col'>
         <div className='grid grid-cols-6 text-right bg-muted border-x border-neutral-800 font-bold text-muted-foreground'>
             <div
-                className={`text-left pl-4 col-span-2 ${textClassColors[character.class.toLowerCase()]}`}
+                className={`capitalize text-left pl-4 col-span-2 ${textClassColors[character.class.toLowerCase()]}`}
             >
                 {character.name}-{character.server}
             </div>
@@ -109,24 +36,18 @@ const CharacterRow = ({ character, showTitles }) => (
 );
 
 const SpecRow = ({ spec }) => {
-    const rawDiff = spec.dps_gain;
-    const pctDiff = spec.dps_gain / spec.max_dps;
-    const isBIS = spec.dps_gain >= spec.bis_gain;
-    let rawRelDiff = 0.0;
-    let pctRelDiff = 0.0;
-
-    if (!isBIS) {
-        rawRelDiff = spec.bis_gain;
-        pctRelDiff = spec.bis_gain / spec.max_dps;
-    }
-
     return (
-        <div className='grid grid-cols-6 border-b bg-neutral-900 hover:bg-muted/50 items-center px-4'>
+        <a
+            href={spec.url}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='grid grid-cols-6 border-b bg-neutral-900 hover:bg-muted/50 items-center px-4'
+        >
             <div className='col-span-2 capitalize py-1'>
                 <div className='flex flex-row'>
                     <div className='w-6 h-6'>
                         <Image
-                            alt={spec.spec}
+                            alt={spec.name}
                             width='0'
                             height='0'
                             sizes='100vw'
@@ -134,21 +55,36 @@ const SpecRow = ({ spec }) => {
                             src={`https://wow.zamimg.com/images/wow/icons/large/${spec.icon}.jpg`}
                         />
                     </div>
-                    <span className='font-semibold pl-2'>{spec.spec}</span>
+                    <span className='font-semibold pl-2'>{spec.name}</span>
+                    <span className='text-[0.65rem] ml-2 px-1 py-0.5  self-center font-bold text-white bg-neutral-600 rounded-md'>
+                        iLvl {spec.ilvl_equip} / {spec.ilvl}
+                    </span>
                 </div>
             </div>
-            <DPSDisplay dps={pctRelDiff} percent />
-            <DPSDisplay dps={rawRelDiff} />
-            <DPSDisplay dps={rawDiff} />
-            <DPSDisplay dps={pctDiff} percent icon doubleIcon={isBIS} />
-        </div>
+            <DPSDisplay dps={spec.is_bis ? 0 : spec.bis_dec} percent />
+            <DPSDisplay dps={spec.is_bis ? 0 : Math.round(spec.bis_gain)} />
+            <DPSDisplay dps={Math.round(spec.item_gain)} />
+            <DPSDisplay dps={spec.item_dec} percent icon doubleIcon={spec.is_bis} />
+        </a>
     );
 };
 
-export default function ItemDetails({ item }) {
+export default function ItemDetails({ itemData, queryStatus }) {
+    if (queryStatus === 'loading' || queryStatus === 'pending') {
+        return <div />;
+    }
+
+    if (queryStatus === 'error' || itemData.length === 0) {
+        return (
+            <div className='w-full text-center font-semibold my-4'>
+                No reports contain this item.
+            </div>
+        );
+    }
+    console.log(itemData);
     return (
         <div>
-            {itemCharacterDPS.map((character, i) => (
+            {itemData.map((character, i) => (
                 <CharacterRow
                     key={`${character.name}-${character.server}`}
                     character={character}

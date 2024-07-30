@@ -10,11 +10,11 @@ export const parse = (json, rules) => {
 
     const character = getCharacter(simbot);
     const report = getReport(simbot);
-    report.dps = json.sim.players[0].collected_data.dps.mean
+    report.dps = json.sim.players[0].collected_data.dps.mean;
     const { instances, encounters } = getInstances(simbot.meta);
-    const { items, encounterItems } = getItems(simbot.meta);
+    const items = getItems(simbot.meta);
 
-    const reportItems = getReportItems(json.sim);
+    const reportItems = getReportItems(json.sim, report.dps);
 
     return {
         character,
@@ -22,7 +22,6 @@ export const parse = (json, rules) => {
         instances,
         encounters,
         items,
-        encounterItems,
         reportItems,
     };
 };
@@ -42,9 +41,9 @@ const getCharacter = (simbot) => {
     const meta = simbot.meta;
     const data = meta.rawFormData;
     return {
-        name: data.armory.name,
-        server: data.armory.realm,
-        class: simbot.charClass,
+        name: data.armory.name.toLowerCase(),
+        server: data.armory.realm.toLowerCase(),
+        class: simbot.charClass.toLowerCase(),
     };
 };
 
@@ -63,17 +62,20 @@ const getReport = (simbot) => {
     };
 };
 
-const getReportItems = (sim) => {
+const getReportItems = (sim, currentDPS) => {
     const results = sim.profilesets.results.reduce((acc, r) => {
         // "1200/2486/raid-mythic-fated/194301/525/0/trinket1/"
         // "instanceId/encounterId/difficulty/encounterItems[].id/itemLevel/enchant/slot"
         const itemProps = r.name.split('/');
         const itemID = itemProps[3];
+        const encounterID = itemProps[1];
         let itemSlot = itemProps.at(-2);
         if (isItemRingOrTrinket(itemSlot)) itemSlot = itemSlot.slice(0, -1);
-        const itemKey = `${itemID}${itemSlot}`;
+        if (itemSlot === 'off_hand' || itemSlot === 'main_hand') itemSlot = 'weapon';
+        const itemKey = `${encounterID}${itemID}${itemSlot}`;
+        const dpsGain = r.mean - currentDPS;
         // already exists, more DPS.
-        if (acc?.[itemKey]?.dps > r.mean) {
+        if (acc?.[itemKey]?.dps > dpsGain) {
             return acc;
         }
 
@@ -82,10 +84,12 @@ const getReportItems = (sim) => {
             [itemKey]: {
                 item_id: itemID,
                 item_slot: itemSlot,
-                dps: r.mean,
+                encounter_id: encounterID,
+                dps: dpsGain,
             },
         };
     }, {});
+
     return Object.values(results);
 };
 
@@ -115,73 +119,44 @@ const getInstances = (meta) => {
 };
 
 const getItems = (meta) => {
-    const { items, encounterItems } = meta.rawFormData.droptimizerItems.reduce(
-        (acc, item) => {
-            const itemClass = itemClasses[item.item.itemClass];
-            const itemSlot = isItemRingOrTrinket(item.slot) ? item.slot.slice(0, -1) : item.slot;
-            const itemKey = `${item.item.id}${itemSlot}`;
+    const items = meta.rawFormData.droptimizerItems.reduce((acc, item) => {
+        const itemClass = itemClasses[item.item.itemClass];
+        let itemSlot = isItemRingOrTrinket(item.slot) ? item.slot.slice(0, -1) : item.slot;
+        if (itemSlot === 'off_hand' || itemSlot === 'main_hand') itemSlot = 'weapon';
+        const itemKey = `${item.item.id}${itemSlot}`;
 
-            acc.items[itemKey] = {
-                id: item.item.id,
-                slot: itemSlot,
-                icon: item.item.icon,
-                name: item.item.name,
-                type: itemClass ?? 'Unknown',
-                subtype: itemSubTypes[itemClass]?.[item.item.itemSubClass] ?? 'Unknown',
+        acc[itemKey] = {
+            id: item.item.id,
+            slot: itemSlot,
+            icon: item.item.icon,
+            name: item.item.name,
+            type: itemClass ?? 'Unknown',
+            subtype: itemSubTypes[itemClass]?.[item.item.itemSubClass] ?? 'Unknown',
+        };
+
+        if (item.item.sourceItem) {
+            const sourceItem = item.item.sourceItem;
+            const sourceItemClass = itemClasses[sourceItem.itemClass];
+            let sourceItemSlot = itemSlot;
+            if (sourceItemClass !== 'Armor') sourceItemSlot = 'token';
+            const sourceItemKey = `${sourceItem.id}${sourceItemSlot}`;
+            acc[sourceItemKey] = {
+                id: sourceItem.id,
+                slot: sourceItemSlot,
+                name: sourceItem.name,
+                icon: sourceItem.icon,
+                type: sourceItemClass ?? 'Unknown',
+                subtype: itemSubTypes[sourceItemClass]?.[sourceItem.itemSubClass] ?? 'Unknown',
             };
 
-            acc.encounterItems = {
-                ...acc.encounterItems,
-                ...item.item.sources.reduce(
-                    (acc, i) => ({
-                        ...acc,
-                        [`${i.encounterId}${itemKey}`]: {
-                            encounter_id: i.encounterId,
-                            item_id: item.item.id,
-                            item_slot: itemSlot,
-                        },
-                    }),
-                    {},
-                ),
-            };
+            acc[itemKey]['source_item_id'] = sourceItem.id;
+            acc[itemKey]['source_item_slot'] = sourceItemSlot;
+        }
 
-            if (item.item.sourceItem) {
-                const sourceItem = item.item.sourceItem;
-                const sourceItemClass = itemClasses[sourceItem.itemClass];
-                const sourceItemKey = `${sourceItem.id}${itemSlot}`;
-                acc.items[sourceItemKey] = {
-                    id: sourceItem.id,
-                    slot: itemSlot,
-                    name: sourceItem.name,
-                    icon: sourceItem.icon,
-                    type: sourceItemClass ?? 'Unknown',
-                    subtype: itemSubTypes[sourceItemClass]?.[sourceItem.itemSubClass] ?? 'Unknown',
-                };
+        return acc;
+    }, {});
 
-                acc.items[itemKey]['source_item_id'] = sourceItem.id;
-                acc.items[itemKey]['source_item_slot'] = itemSlot;
-                acc.encounterItems = {
-                    ...acc.encounterItems,
-                    ...sourceItem.sources.reduce(
-                        (acc, i) => ({
-                            ...acc,
-                            [`${i.encounterId}${sourceItemKey}`]: {
-                                encounter_id: i.encounterId,
-                                item_id: sourceItem.id,
-                                item_slot: itemSlot,
-                            },
-                        }),
-                        {},
-                    ),
-                };
-            }
-
-            return acc;
-        },
-        { items: {}, encounterItems: {} },
-    );
-
-    return { items: Object.values(items), encounterItems: Object.values(encounterItems) };
+    return Object.values(items);
 };
 
 const TRINKET_RING_REGEX = /(trinket|finger).+/;

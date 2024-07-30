@@ -19,7 +19,7 @@ export default function DifficultyNav() {
     const { navState, updateNavState } = useContext(NavContext);
     const { selectedDifficulty } = navState;
     useEffect(() => {
-        if (!selectedDifficulty) updateNavState({ selectedDifficulty: difficulties[0] });
+        if (!selectedDifficulty) updateNavState({ selectedDifficulty: difficulties[2] });
     }, [selectedDifficulty, updateNavState]);
     return (
         <div className='flex items-center'>
