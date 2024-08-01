@@ -24,7 +24,7 @@ export default function DPSDisplay({ dps, icon, doubleIcon, percent }) {
 
     let formattedDPS;
     if (percent) {
-        formattedDPS = formatter.format(Math.round(dps * 10000) / 100) + '%';
+        formattedDPS = (dps * 100).toFixed(2) + '%';
     } else {
         formattedDPS = formatter.format(dps);
     }

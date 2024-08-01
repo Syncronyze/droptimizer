@@ -1,7 +1,7 @@
 'use client';
 import { itemSubTypes, itemClasses } from '@lib/enums';
 
-export const parse = (json, rules) => {
+export const parse = (json) => {
     const simbot = json.simbot;
     // const invalid = isInvalid(simbot.meta, rules);
     // if (invalid) {
@@ -12,9 +12,9 @@ export const parse = (json, rules) => {
     const report = getReport(simbot);
     report.dps = json.sim.players[0].collected_data.dps.mean;
     const { instances, encounters } = getInstances(simbot.meta);
-    const items = getItems(simbot.meta);
+    const { items, reportItemFKs } = getItems(simbot.meta);
 
-    const reportItems = getReportItems(json.sim, report.dps);
+    const reportItems = getReportItems(json.sim, report.dps, reportItemFKs);
 
     return {
         character,
@@ -26,23 +26,22 @@ export const parse = (json, rules) => {
     };
 };
 
-const isInvalid = (meta, rules) => {
-    const ret = [];
-    for (const [keyRule, keyValue] of Object.entries(rules)) {
-        if (meta[keyRule] != keyValue) {
-            ret.push(keyRule);
-        }
-    }
+// const isInvalid = (meta, rules) => {
+//     const ret = [];
+//     for (const [keyRule, keyValue] of Object.entries(rules)) {
+//         if (meta[keyRule] != keyValue) {
+//             ret.push(keyRule);
+//         }
+//     }
 
-    return ret.length > 1 ? ret : false;
-};
+//     return ret.length > 1 ? ret : false;
+// };
 
 const getCharacter = (simbot) => {
-    const meta = simbot.meta;
-    const data = meta.rawFormData;
+    const formData = simbot.meta.rawFormData;
     return {
-        name: data.armory.name.toLowerCase(),
-        server: data.armory.realm.toLowerCase(),
+        name: formData.character.name.toLowerCase(),
+        server: formData.character.realm.toLowerCase(),
         class: simbot.charClass.toLowerCase(),
     };
 };
@@ -52,6 +51,7 @@ const getReport = (simbot) => {
     const firstItemUpgrade = simbot.meta.itemLibrary[0].upgrade;
     return {
         difficulty: getDifficulty(formData.droptimizer.difficulty),
+        instance_id: formData.droptimizer.instance,
         spec_id: formData.droptimizer.specId,
         date: new Date(simbot.date).toLocaleString('en-US', { timeZone: 'America/Chicago' }),
         avg_ilvl: formData.character.items.averageItemLevel,
@@ -62,17 +62,14 @@ const getReport = (simbot) => {
     };
 };
 
-const getReportItems = (sim, currentDPS) => {
+const getReportItems = (sim, currentDPS, items) => {
     const results = sim.profilesets.results.reduce((acc, r) => {
         // "1200/2486/raid-mythic-fated/194301/525/0/trinket1/"
         // "instanceId/encounterId/difficulty/encounterItems[].id/itemLevel/enchant/slot"
-        const itemProps = r.name.split('/');
-        const itemID = itemProps[3];
-        const encounterID = itemProps[1];
-        let itemSlot = itemProps.at(-2);
-        if (isItemRingOrTrinket(itemSlot)) itemSlot = itemSlot.slice(0, -1);
-        if (itemSlot === 'off_hand' || itemSlot === 'main_hand') itemSlot = 'weapon';
-        const itemKey = `${encounterID}${itemID}${itemSlot}`;
+        const [_, encounter_id, ___, ____, ilvl, _____, slot] = r.name.split('/');
+        const { item_id, source } = items[r.name];
+        const itemKey = `${encounter_id}${item_id}${ilvl}${source}`;
+
         const dpsGain = r.mean - currentDPS;
         // already exists, more DPS.
         if (acc?.[itemKey]?.dps > dpsGain) {
@@ -82,9 +79,11 @@ const getReportItems = (sim, currentDPS) => {
         return {
             ...acc,
             [itemKey]: {
-                item_id: itemID,
-                item_slot: itemSlot,
-                encounter_id: encounterID,
+                item_id,
+                ilvl,
+                slot: parseSlot(slot),
+                source,
+                encounter_id,
                 dps: dpsGain,
             },
         };
@@ -119,44 +118,38 @@ const getInstances = (meta) => {
 };
 
 const getItems = (meta) => {
-    const items = meta.rawFormData.droptimizerItems.reduce((acc, item) => {
-        const itemClass = itemClasses[item.item.itemClass];
-        let itemSlot = isItemRingOrTrinket(item.slot) ? item.slot.slice(0, -1) : item.slot;
-        if (itemSlot === 'off_hand' || itemSlot === 'main_hand') itemSlot = 'weapon';
-        const itemKey = `${item.item.id}${itemSlot}`;
+    const { items, reportItemFKs } = meta.rawFormData.droptimizerItems.reduce(
+        (acc, r) => {
+            const { item } = r;
+            const isOriginal = !item.sourceItem;
+            const itemToParse = isOriginal ? item : item.sourceItem;
+            const parsedItem = parseItem(itemToParse);
 
-        acc[itemKey] = {
-            id: item.item.id,
-            slot: itemSlot,
-            icon: item.item.icon,
-            name: item.item.name,
-            type: itemClass ?? 'Unknown',
-            subtype: itemSubTypes[itemClass]?.[item.item.itemSubClass] ?? 'Unknown',
-        };
-
-        if (item.item.sourceItem) {
-            const sourceItem = item.item.sourceItem;
-            const sourceItemClass = itemClasses[sourceItem.itemClass];
-            let sourceItemSlot = itemSlot;
-            if (sourceItemClass !== 'Armor') sourceItemSlot = 'token';
-            const sourceItemKey = `${sourceItem.id}${sourceItemSlot}`;
-            acc[sourceItemKey] = {
-                id: sourceItem.id,
-                slot: sourceItemSlot,
-                name: sourceItem.name,
-                icon: sourceItem.icon,
-                type: sourceItemClass ?? 'Unknown',
-                subtype: itemSubTypes[sourceItemClass]?.[sourceItem.itemSubClass] ?? 'Unknown',
+            acc.items = {
+                ...acc.items,
+                [parsedItem.id]: parsedItem,
             };
 
-            acc[itemKey]['source_item_id'] = sourceItem.id;
-            acc[itemKey]['source_item_slot'] = sourceItemSlot;
-        }
+            // by creating a second object here, we are creating the link between the raidbots "ID"
+            // and the source item. given "id" 1208/2530/raid-mythic-fated/217207/528/0/hands/
+            // this will be found in rawFormData.droptimizerItems and this is how its identified in the results
+            // so now when we getReportItems we reference the item_id as linked here, essentially "overwriting" values
+            // if it's already been seen prior and it's higher dps.
+            acc.reportItemFKs = {
+                ...acc.reportItemFKs,
+                [r.id]: {
+                    item_id: parsedItem.id,
+                    slot: item.slot,
+                    source: isOriginal ? 'original' : item.fromToken ? 'token' : 'catalyst',
+                },
+            };
 
-        return acc;
-    }, {});
+            return acc;
+        },
+        { items: {}, reportItemFKs: {} },
+    );
 
-    return Object.values(items);
+    return { items: Object.values(items), reportItemFKs };
 };
 
 const TRINKET_RING_REGEX = /(trinket|finger).+/;
@@ -168,4 +161,22 @@ const DIFFICULTY_REGEX = /(normal|heroic|mythic)/i;
 const getDifficulty = (difficulty) => {
     difficulty = difficulty.match(DIFFICULTY_REGEX)[0] || 'error';
     return difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+};
+
+const parseSlot = (slotStr) => {
+    if (isItemRingOrTrinket(slotStr)) slotStr = slotStr.slice(0, -1);
+    else if (slotStr === 'off_hand' || slotStr === 'main_hand') slotStr = 'weapon';
+    return slotStr;
+};
+
+const parseItem = (item) => {
+    const itemType = itemClasses[item.itemClass] ?? 'Unknown';
+    const itemSubType = itemSubTypes[itemType]?.[item.itemSubClass] ?? 'Unknown';
+    return {
+        id: item.id,
+        name: item.name,
+        icon: item.icon,
+        type: itemSubType,
+        subtype: itemSubType,
+    };
 };

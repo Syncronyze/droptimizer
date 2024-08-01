@@ -70,21 +70,18 @@ const SpecRow = ({ spec }) => {
 };
 
 export default function ItemDetails({ itemData, queryStatus }) {
-    if (queryStatus === 'loading' || queryStatus === 'pending') {
-        return <div />;
-    }
-
-    if (queryStatus === 'error' || itemData.length === 0) {
+    const isLoading = queryStatus === 'loading' || queryStatus === 'pending';
+    if (!isLoading && (queryStatus === 'error' || itemData.length === 0)) {
         return (
             <div className='w-full text-center font-semibold my-4'>
                 No reports contain this item.
             </div>
         );
     }
-    console.log(itemData);
+
     return (
-        <div>
-            {itemData.map((character, i) => (
+        <div className={`transition-all ${isLoading ? 'h-64' : 'h-fit'}`}>
+            {itemData?.map((character, i) => (
                 <CharacterRow
                     key={`${character.name}-${character.server}`}
                     character={character}

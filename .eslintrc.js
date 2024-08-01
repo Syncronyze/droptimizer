@@ -18,5 +18,13 @@ module.exports = {
     },
     rules: {
         'react/prop-types': [0],
+        'no-unused-vars': [
+            'warn', // or "error"
+            {
+                argsIgnorePattern: '^_',
+                varsIgnorePattern: '^_',
+                caughtErrorsIgnorePattern: '^_',
+            },
+        ],
     },
 };

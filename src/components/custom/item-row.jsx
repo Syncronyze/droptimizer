@@ -14,14 +14,20 @@ import { NavContext } from './nav-context';
 export default function ItemRow({ item, open, setOpen }) {
     const { selectedEncounter, selectedDifficulty } = useContext(NavContext).navState;
     const { data, status } = useQuery({
-        queryKey: ['itemsDetails', item.id, selectedEncounter?.id, selectedDifficulty.name],
+        queryKey: [
+            'itemsDetails',
+            item.id,
+            item.is_source_item,
+            selectedEncounter?.id,
+            selectedDifficulty.name,
+        ],
         queryFn: async () =>
             defaultFetch({
                 endpoint: 'item-details',
                 method: 'GET',
                 params: {
                     item: item.id,
-                    is_source_item: item.is_source_item,
+                    source: item.is_source_item,
                     difficulty: selectedDifficulty.name,
                     encounter: selectedEncounter.id,
                 },

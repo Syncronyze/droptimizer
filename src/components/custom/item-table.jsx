@@ -70,7 +70,10 @@ export default function ItemTable() {
                         key={`${item.id}${item.is_source_item}`}
                         item={item}
                         difficulty={selectedDifficulty}
-                        open={openedItem?.id === item.id}
+                        open={
+                            openedItem?.id === item.id &&
+                            openedItem?.is_source_item === item.is_source_item
+                        }
                         setOpen={handleOpen}
                     />
                 ))}

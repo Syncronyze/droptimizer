@@ -1,20 +1,11 @@
--- Delete all rows from report_items
-DELETE FROM report_items;
+ALTER TABLE public.reports
+    ADD COLUMN instance_id INTEGER;
 
--- Delete all rows from reports
-DELETE FROM reports;
+ALTER TABLE public.reports
+    DROP CONSTRAINT reports_char_id_spec_id_difficulty_key;
 
--- Alter report_items table to add encounter_id column
-ALTER TABLE report_items ADD COLUMN encounter_id INTEGER;
+ALTER TABLE public.reports
+    ADD CONSTRAINT reports_char_id_spec_id_difficulty_instance_id_key UNIQUE (char_id, spec_id, difficulty, instance_id);
 
--- Add NOT NULL constraint
-ALTER TABLE report_items ALTER COLUMN encounter_id SET NOT NULL;
-
--- Add foreign key constraint
-ALTER TABLE report_items ADD CONSTRAINT report_items_encounter_id_fkey 
-FOREIGN KEY (encounter_id) REFERENCES encounters(id);
-
--- Add the primary key constraint
-ALTER TABLE report_items
-ADD CONSTRAINT report_items_pkey 
-PRIMARY KEY (report_id, item_id, item_slot, encounter_id);
+ALTER TABLE public.reports
+    ADD FOREIGN KEY (instance_id) REFERENCES public.instances(id);

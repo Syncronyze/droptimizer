@@ -61,8 +61,7 @@ export default async function handler(req, res) {
         return;
     }
 
-    const { character, report, instances, encounters, items, reportItems } =
-        parse(raidbotsReport);
+    const { character, report, instances, encounters, items, reportItems } = parse(raidbotsReport);
 
     try {
         await addInstances(instances);
@@ -89,6 +88,7 @@ export default async function handler(req, res) {
         return;
     }
     console.info('Successfully added report.');
+
     res.status(200).json({ success: 'Successfully added report.' });
 }
 
@@ -112,7 +112,6 @@ const addItems = async (_items) => {
     await db.insert(items).values(_items).onConflictDoNothing();
 };
 
-
 const addCharacter = async (_character) => {
     console.info(`Adding character ${JSON.stringify(_character)}.`);
     const [result] = await db
@@ -121,7 +120,7 @@ const addCharacter = async (_character) => {
         .onConflictDoUpdate({
             target: [characters.name, characters.server],
             set: {
-                name: sql`${characters.name}`,
+                name: sql`${_character.name}`,
             },
         })
         .returning({ id: characters.id });
@@ -134,7 +133,7 @@ const addReport = async (report) => {
         .insert(reports)
         .values(report)
         .onConflictDoUpdate({
-            target: [reports.char_id, reports.spec_id],
+            target: [reports.char_id, reports.spec_id, reports.instance_id, reports.difficulty],
             set: report,
         })
         .returning();
