@@ -1,5 +1,4 @@
 import React, { memo, useCallback, useContext, useEffect } from 'react';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@radix-ui/react-collapsible';
 import { Badge } from '@components/ui';
 import Image from 'next/image';
 import { textClassColors } from '@utils/css-utils';
@@ -7,6 +6,12 @@ import { defaultFetch } from '@lib/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { NavContext, DPSDisplay, Spinner, ItemDetailTable } from '@components';
 import { ChevronRightIcon } from 'lucide-react';
+import {
+    AccordionHeader,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from '@radix-ui/react-accordion';
 
 export default memo(function ItemListItem({ item, open, setOpen, loaded }) {
     const { selectedEncounter, selectedDifficulty } = useContext(NavContext).navState;
@@ -39,10 +44,10 @@ export default memo(function ItemListItem({ item, open, setOpen, loaded }) {
     }, [data?.length, item.id, open, setOpen]);
 
     return (
-        <Collapsible asChild open={loaded} onOpenChange={tryLoad}>
-            <>
-                <CollapsibleTrigger asChild>
-                    <div className='grid grid-cols-12 cursor-pointer p-2 bg-neutral-950 hover:bg-muted/30 items-center border-b'>
+        <AccordionItem value={item.id} onClick={tryLoad}>
+            <AccordionHeader>
+                <AccordionTrigger asChild>
+                    <div className='grid grid-cols-12 relative z-30 cursor-pointer p-2 bg-neutral-950 hover:bg-muted/30 items-center border-b'>
                         <div className='col-span-7'>
                             <div className='flex flex-row items-center px-4'>
                                 <a href='#' data-wowhead={`item=${item.id}`}>
@@ -84,11 +89,11 @@ export default memo(function ItemListItem({ item, open, setOpen, loaded }) {
                             )}
                         </div>
                     </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent className='bg-muted/50 oveflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down'>
-                    <ItemDetailTable itemData={data} queryStatus={status} />
-                </CollapsibleContent>
-            </>
-        </Collapsible>
+                </AccordionTrigger>
+            </AccordionHeader>
+            <AccordionContent className='overflow-clip relative transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down'>
+                <ItemDetailTable itemData={data} queryStatus={status} />
+            </AccordionContent>
+        </AccordionItem>
     );
 });

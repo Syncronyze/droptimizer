@@ -18,9 +18,10 @@ const getIcon = (dps, doubleIcon) => {
 };
 
 const formatNumber = (dps) => {
-    if (dps > 999999) {
+    const absDPS = Math.abs(dps);
+    if (absDPS > 999999) {
         return (dps / 1000000).toFixed(1) + 'm';
-    } else if (dps > 999) {
+    } else if (absDPS > 999) {
         return (dps / 1000).toFixed(1) + 'k';
     }
     return parseInt(dps);

@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { defaultFetch } from '@lib/react-query';
 import { Skeleton } from '@components/ui';
 import dynamic from 'next/dynamic';
+import { Accordion } from '@radix-ui/react-accordion';
 
 const headerClasses =
     'h-10 px-2 text-left align-middle font-medium text-muted-foreground p-2 hover:bg-muted/50 select-none pointer-default';
@@ -66,7 +67,7 @@ export default function ItemList() {
     }
 
     return (
-        <div className='flex flex-col min-h-0 ring-1 ring-neutral-800 rounded-md '>
+        <div className='flex flex-col min-h-0 h-full ring-1 ring-neutral-800 rounded-md '>
             <div className='grid grid-cols-12 border-b pr-4'>
                 <div className={`col-span-7 ${headerClasses}`}>
                     <a href='#' className='flex flex-row items-center px-4 cursor-default'>
@@ -80,7 +81,7 @@ export default function ItemList() {
                 </div>
             </div>
             <div
-                className={`flex flex-auto flex-col overflow-y-scroll rounded-b-md ${scrollClasses}`}
+                className={`flex flex-auto flex-col relative overflow-y-scroll rounded-b-md ${scrollClasses}`}
             >
                 {status === 'loading' || status === 'pending' ? (
                     <>
@@ -108,7 +109,7 @@ export default function ItemList() {
                         ))}
                     </>
                 ) : (
-                    <>
+                    <Accordion type='single' value={openedItem.loaded}>
                         {items.map((item) => (
                             <ItemListItem
                                 key={`${item.id}${item.source}`}
@@ -118,7 +119,7 @@ export default function ItemList() {
                                 setOpen={handleOpen}
                             />
                         ))}
-                    </>
+                    </Accordion>
                 )}
             </div>
         </div>

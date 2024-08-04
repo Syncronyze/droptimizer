@@ -34,6 +34,7 @@ export default function AddSimForm() {
                 throw new Error('Failed to submit the data. Please try again.');
             }
             setAlert({ type: 'success', description: 'Successfully added the sim.' });
+            setValue('');
         } catch (error) {
             setAlert({ type: 'error', description: error.message });
             console.error(error);
@@ -53,17 +54,18 @@ export default function AddSimForm() {
                 </div>
             </PopoverTrigger>
             <PopoverContent asChild>
-                <div className='grid w-full max-w-sm items-center gap-1.5'>
-                    <form onSubmit={onSubmit}>
-                        <Label htmlFor='url'>Sim URL</Label>
+                <div className='w-auto items-center gap-1.5'>
+                    <Label htmlFor='url'>Sim URL</Label>
+                    <form className='flex flex-row gap-x-4 justify-center items-center mt-2 mb-4' onSubmit={onSubmit}>
                         <Input
                             onChange={(e) => {
                                 setValue(e.target.value);
                             }}
+                            className='w-96 text-xs'
                             value={value}
                             type='text'
                             id='url'
-                            placeholder='https://www.raidbots.com/simbot/report/xxxxxxxxxxxxxxxxxxxxxx'
+                            placeholder='https://www.raidbots.com/simbot/report/...'
                         />
                         {isLoading ? (
                             <Button variant='secondary' disabled>

@@ -6,29 +6,32 @@ import { Badge } from '@components/ui';
 
 const CharacterTable = ({ character, showTitles }) => (
     <>
-        <thead className='text-right bg-muted border-x border-neutral-800 font-bold text-muted-foreground'>
-            <tr>
-                <th
-                    className={`capitalize text-left pl-4 col-span-2 ${textClassColors[character.class.toLowerCase().replace(' ', '_')]}`}
-                >
-                    {character.name}
-                </th>
-                {showTitles ? (
-                    <>
-                        <th>BIS Upgrade %</th>
-                        <th>BIS Gain</th>
-                        <th>DPS Gain</th>
-                        <th className='pr-4'>Upgrade %</th>
-                    </>
-                ) : (
-                    <>
-                        <th />
-                        <th />
-                        <th />
-                        <th />
-                    </>
-                )}
-            </tr>
+        <thead className='text-right bg-muted font-bold text-muted-foreground'>
+            {showTitles ? (
+                <tr className='sticky top-0 border-b border-neutral-700'>
+                    <th
+                        className={`capitalize bg-muted text-left pl-4 col-span-2 ${textClassColors[character.class.toLowerCase().replace(' ', '_')]}`}
+                    >
+                        {character.name}
+                    </th>
+                    <th className='bg-muted'>BIS Upgrade %</th>
+                    <th className='bg-muted'>BIS Gain</th>
+                    <th className='bg-muted'>Upgrade %</th>
+                    <th className='pr-4 bg-muted'>DPS Gain</th>
+                </tr>
+            ) : (
+                <tr>
+                    <th
+                        className={`capitalize sticky border-y border-neutral-700 top-0 bg-muted text-left pl-4 col-span-2 z-10 ${textClassColors[character.class.toLowerCase().replace(' ', '_')]}`}
+                    >
+                        {character.name}
+                    </th>
+                    <th />
+                    <th />
+                    <th />
+                    <th />
+                </tr>
+            )}
         </thead>
         <tbody>
             {character.spec_dps.map((spec) => (
@@ -45,7 +48,7 @@ const SpecRow = ({ spec_dps }) => {
     const isBIS = spec_dps.dps_gain === spec_dps.bis_gain;
     return (
         <tr
-            className='hover:bg-muted/50 cursor-pointer'
+            className={`border-y border-neutral-700 cursor-pointer ${isBIS ? 'bg-slate-700/40 hover:bg-slate-700/30 ' : 'hover:bg-muted/50'}`}
             onClick={() => window.open(spec_dps.url, '_blank')}
         >
             <td className='capitalize py-1 pl-2'>
@@ -71,12 +74,12 @@ const SpecRow = ({ spec_dps }) => {
                         )}
                     </span>
                     {spec_dps.source === 'catalyst' && (
-                        <Badge variant='secondary'>
+                        <Badge>
                             <span>Catalyst</span>
                         </Badge>
                     )}
                     {spec_dps.source === 'multitoken' && (
-                        <Badge variant='secondary'>
+                        <Badge>
                             <span>{spec_dps.slot}</span>
                         </Badge>
                     )}
@@ -89,10 +92,10 @@ const SpecRow = ({ spec_dps }) => {
                 <DPSDisplay dps={isBIS ? 0 : Math.round(spec_dps.bis_gain)} />
             </td>
             <td>
-                <DPSDisplay dps={Math.round(spec_dps.dps_gain)} />
+                <DPSDisplay dps={spec_dps.dps_gain_dec} percent />
             </td>
             <td>
-                <DPSDisplay dps={spec_dps.dps_gain_dec} percent icon doubleIcon={isBIS} />
+                <DPSDisplay dps={Math.round(spec_dps.dps_gain)} icon doubleIcon={isBIS} />
             </td>
         </tr>
     );
@@ -109,7 +112,7 @@ export default function ItemDetailTable({ itemData, queryStatus }) {
     }
 
     return (
-        <table className='w-full'>
+        <table className='w-full bg-neutral-900 relative z-20 border-x'>
             {itemData?.map((character, i) => (
                 <CharacterTable
                     key={`${character.name}-${character.server}`}
