@@ -1,15 +1,7 @@
 import { parse } from '@lib/parser';
 import db from '@db';
 import pool from '@lib/pool';
-import {
-    characters,
-    encounters,
-    instances,
-    items,
-    report_items,
-    reports,
-    spec_instances,
-} from '@tables';
+import { characters, encounters, instances, items, report_items, reports } from '@tables';
 import { eq, sql } from 'drizzle-orm';
 
 const URL_REGEX = /[1-9A-z]{22}/;
@@ -65,12 +57,6 @@ export default async function handler(req, res) {
 
     try {
         await addInstances(instances);
-        await addSpecInstances(
-            instances.map((instance) => ({
-                spec_id: report.spec_id,
-                instance_id: instance.id,
-            })),
-        );
         await addEncounters(encounters);
         await addItems(items);
 
@@ -91,12 +77,6 @@ export default async function handler(req, res) {
 
     res.status(200).json({ success: 'Successfully added report.' });
 }
-
-const addSpecInstances = async (specInstances) => {
-    console.info(`Adding spec instances.`);
-    await db.insert(spec_instances).values(specInstances).onConflictDoNothing();
-};
-
 const addInstances = async (_instances) => {
     console.info(`Adding instances.`);
     await db.insert(instances).values(_instances).onConflictDoNothing();

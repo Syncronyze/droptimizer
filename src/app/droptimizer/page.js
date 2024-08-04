@@ -1,11 +1,7 @@
 'use client';
 import React from 'react';
-import ItemTable from '@components/custom/item-table';
-import { NavContextProvider } from '@components/custom/nav-context';
-import DifficultyNav from '@components/custom/difficulty-nav';
-import InstanceNav from '@components/custom/instance-nav';
+import { ItemList, DifficultyNav, BossNav, InstanceNav, NavContextProvider } from '@components';
 import { scrollClasses } from '@utils/css-utils';
-import BossNav from '@components/custom/boss-nav';
 
 export default function Dashboard() {
     return (
@@ -24,7 +20,7 @@ export default function Dashboard() {
                     </div>
                     <div className='flex grow flex-col m-2 gap-y-2'>
                         <DifficultyNav />
-                        <ItemTable />
+                        <ItemList />
                     </div>
                 </NavContextProvider>
             </div>

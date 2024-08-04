@@ -1,11 +1,7 @@
-import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input';
-import { Label } from '@components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
-import { ReloadIcon } from '@radix-ui/react-icons';
-import { PlusCircle } from 'lucide-react';
+import { Button, Input, Label, Popover, PopoverContent, PopoverTrigger } from '@components/ui';
 import React, { useState } from 'react';
-import CustomAlert from '@components/custom/alert';
+import { PlusCircleIcon, RefreshCwIcon } from 'lucide-react';
+import { CustomAlert, Spinner } from '@components';
 
 const URL_REGEX = /[1-9A-z]{22}/;
 
@@ -51,7 +47,7 @@ export default function AddSimForm() {
             <PopoverTrigger asChild>
                 <div className='ml-auto flex items-center gap-2'>
                     <Button size='sm' className='h-7 gap-1'>
-                        <PlusCircle className='h-3.5 w-3.5' />
+                        <PlusCircleIcon className='h-3.5 w-3.5' />
                         <span>Add Sim</span>
                     </Button>
                 </div>
@@ -71,7 +67,7 @@ export default function AddSimForm() {
                         />
                         {isLoading ? (
                             <Button variant='secondary' disabled>
-                                {isLoading && <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />}
+                                {isLoading && <Spinner />}
                                 Processing...
                             </Button>
                         ) : (

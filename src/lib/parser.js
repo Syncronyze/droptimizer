@@ -68,8 +68,13 @@ const getReportItems = (sim, currentDPS, items) => {
         // "instanceId/encounterId/difficulty/encounterItems[].id/itemLevel/enchant/slot"
         const [_, encounter_id, ___, ____, ilvl, _____, slot] = r.name.split('/');
         const { item_id, source } = items[r.name];
-        const itemKey = `${encounter_id}${item_id}${ilvl}${source}`;
+        const itemKey = `${encounter_id}${item_id}${ilvl}`;
 
+        // token exists already but new item appeared from it.
+        // this is a multitoken, update the source to be a multitoken.
+        if (source === 'token' && acc[itemKey]) {
+            acc[itemKey].source = 'multitoken';
+        }
         const dpsGain = r.mean - currentDPS;
         // already exists, more DPS.
         if (acc?.[itemKey]?.dps > dpsGain) {
@@ -165,7 +170,6 @@ const getDifficulty = (difficulty) => {
 
 const parseSlot = (slotStr) => {
     if (isItemRingOrTrinket(slotStr)) slotStr = slotStr.slice(0, -1);
-    else if (slotStr === 'off_hand' || slotStr === 'main_hand') slotStr = 'weapon';
     return slotStr;
 };
 

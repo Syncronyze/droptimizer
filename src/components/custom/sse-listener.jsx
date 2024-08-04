@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export default function UserCard() {
+export default function SSEListener() {
     // SSE connection reference
     const [sseConnection, setSSEConnection] = useState(null);
 

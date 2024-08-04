@@ -4,8 +4,8 @@ import { Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import React, { useContext, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Skeleton } from '@components/ui/skeleton';
-import { NavContext } from './nav-context';
+import { Skeleton } from '@components/ui';
+import { NavContext } from '@components';
 import { cn } from '@utils/css-utils';
 
 export default function BossNav() {

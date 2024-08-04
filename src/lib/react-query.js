@@ -1,6 +1,7 @@
 'use client';
 
 import { QueryClient } from '@tanstack/react-query';
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export const queryClient = new QueryClient({
     defaultOptions: {
@@ -24,6 +25,6 @@ export const defaultFetch = async ({ endpoint, method, params }) => {
     if (!res.ok) {
         throw new Error(`Response status not ok - ${res.status}`);
     }
-
+    await sleep(Math.random() * 1000);
     return await res.json();
 };

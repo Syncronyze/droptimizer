@@ -1,8 +1,6 @@
 import React from 'react';
 import { ChevronDown, ChevronUp, ChevronsDown, ChevronsUp } from 'lucide-react';
 
-const formatter = new Intl.NumberFormat();
-
 const getIcon = (dps, doubleIcon) => {
     if (dps >= 0) {
         return doubleIcon ? (
@@ -19,18 +17,28 @@ const getIcon = (dps, doubleIcon) => {
     );
 };
 
+const formatNumber = (dps) => {
+    if (dps > 999999) {
+        return (dps / 1000000).toFixed(1) + 'm';
+    } else if (dps > 999) {
+        return (dps / 1000).toFixed(1) + 'k';
+    }
+    return parseInt(dps);
+};
+
 export default function DPSDisplay({ dps, icon, doubleIcon, percent }) {
     const directionIcon = icon ? getIcon(dps, doubleIcon) : null;
 
-    let formattedDPS;
-    if (percent) {
-        formattedDPS = (dps * 100).toFixed(2) + '%';
-    } else {
-        formattedDPS = formatter.format(dps);
-    }
+    let formattedDPS = '—';
+    if (dps !== 0) {
+        if (percent) {
+            formattedDPS = (dps * 100).toFixed(1) + '%';
+        } else {
+            formattedDPS = formatNumber(dps);
+        }
 
-    if (dps > 0) formattedDPS = '+' + formattedDPS;
-    else if (dps === 0) formattedDPS = '—';
+        if (dps > 0) formattedDPS = '+' + formattedDPS;
+    }
 
     return (
         <span className='flex flex-row justify-end items-center'>

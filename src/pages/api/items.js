@@ -28,19 +28,7 @@ const selectItems = async (encounter, difficulty) => {
     console.info(`Selecting items for encounter ${encounter} and difficulty ${difficulty}`);
 
     return await db
-        .select({
-            id: encounter_item_view.item_id,
-            icon: encounter_item_view.item_icon,
-            name: encounter_item_view.item_name,
-            slot: encounter_item_view.item_slot,
-            is_source_item: encounter_item_view.is_source_item,
-            highest_dps: encounter_item_view.highest_dps,
-            dps_gain: encounter_item_view.dps_gain,
-            dps: encounter_item_view.dps,
-            report_id: encounter_item_view.report_id,
-            encounter_id: encounter_item_view.encounter_id,
-            difficulty: encounter_item_view.difficulty,
-        })
+        .select()
         .from(encounter_item_view)
         .where(
             and(
@@ -48,5 +36,5 @@ const selectItems = async (encounter, difficulty) => {
                 eq(encounter_item_view.difficulty, difficulty),
             ),
         )
-        .orderBy(desc(encounter_item_view.dps_gain));
+        .orderBy(desc(encounter_item_view.highest_dps_gain_dec));
 };

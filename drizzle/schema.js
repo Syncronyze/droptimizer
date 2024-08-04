@@ -8,6 +8,9 @@ import {
     doublePrecision,
     date,
     primaryKey,
+    pgView,
+    json,
+    decimal,
 } from 'drizzle-orm/pg-core';
 
 export const source = pgEnum('source', ['original', 'token', 'catalyst']);
@@ -99,26 +102,6 @@ export const reports = pgTable(
     },
 );
 
-export const spec_instances = pgTable(
-    'spec_instances',
-    {
-        spec_id: integer('spec_id')
-            .notNull()
-            .references(() => specs.id),
-        instance_id: integer('instance_id')
-            .notNull()
-            .references(() => instances.id),
-    },
-    (table) => {
-        return {
-            spec_instances_pkey: primaryKey({
-                columns: [table.spec_id, table.instance_id],
-                name: 'spec_instances_pkey',
-            }),
-        };
-    },
-);
-
 export const report_items = pgTable(
     'report_items',
     {
@@ -152,3 +135,29 @@ export const report_items = pgTable(
         };
     },
 );
+
+export const item_detail_view = pgView('item_detail_view', {
+    name: text('character_name'),
+    server: text('character_server'),
+    class: text('character_class'),
+    id: integer('item_id'),
+    encounter_id: integer('encounter_id'),
+    difficulty: text('difficulty'),
+    spec_dps: json('spec_dps'),
+}).existing();
+
+export const encounter_item_view = pgView('encounter_item_view', {
+    id: integer('item_id'),
+    name: text('item_name'),
+    icon: text('item_icon'),
+    difficulty: text('difficulty'),
+    encounter_id: integer('encounter_id'),
+    slot: text('slot'),
+    source: text('source'),
+    highest_dps_gain: decimal('highest_dps_gain'),
+    highest_dps_gain_dec: decimal('highest_dps_gain_dec'),
+    character_name: text('character_name'),
+    character_class: text('character_class'),
+    character_server: text('character_server'),
+    character_spec: text('character_spec'),
+}).existing();

@@ -1,7 +1,6 @@
 import React, { useContext, useEffect } from 'react';
-import AddSimForm from '@components/custom/add-sim';
+import { AddSimForm, NavContext } from '@components';
 import { cn } from '@utils/css-utils';
-import { NavContext } from './nav-context';
 
 const difficulties = [
     {

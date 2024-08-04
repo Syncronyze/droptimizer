@@ -6,8 +6,8 @@ export const scrollClasses =
     'scrollbar-thumb-neutral-600 scrollbar-track-neutral-900';
 
 export const textClassColors = {
-    deathknight: 'text-dk',
-    demonhunter: 'text-dh',
+    death_knight: 'text-death_knight',
+    demon_hunter: 'text-demon_hunter',
     druid: 'text-druid',
     evoker: 'text-evoker',
     hunter: 'text-hunter',
@@ -20,6 +20,10 @@ export const textClassColors = {
     warlock: 'text-warlock',
     warrior: 'text-warrior',
 };
+
+export const colSpans = [
+    'col-span-1', 'col-span-2', 'col-span-3', 'col-span-4', 'col-span-5', 'col-span-6',
+]
 
 export function cn(...inputs) {
     return twMerge(clsx(inputs));

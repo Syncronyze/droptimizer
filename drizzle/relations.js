@@ -1,14 +1,5 @@
 import { relations } from 'drizzle-orm/relations';
-import {
-    instances,
-    encounters,
-    characters,
-    reports,
-    specs,
-    spec_instances,
-    report_items,
-    items,
-} from './schema';
+import { instances, encounters, characters, reports, specs, report_items, items } from './schema';
 
 export const encountersRelations = relations(encounters, ({ one, many }) => ({
     instance: one(instances, {
@@ -21,7 +12,6 @@ export const encountersRelations = relations(encounters, ({ one, many }) => ({
 export const instancesRelations = relations(instances, ({ many }) => ({
     encounters: many(encounters),
     reports: many(reports),
-    spec_instances: many(spec_instances),
 }));
 
 export const reportsRelations = relations(reports, ({ one, many }) => ({
@@ -46,18 +36,6 @@ export const charactersRelations = relations(characters, ({ many }) => ({
 
 export const specsRelations = relations(specs, ({ many }) => ({
     reports: many(reports),
-    spec_instances: many(spec_instances),
-}));
-
-export const spec_instancesRelations = relations(spec_instances, ({ one }) => ({
-    spec: one(specs, {
-        fields: [spec_instances.spec_id],
-        references: [specs.id],
-    }),
-    instance: one(instances, {
-        fields: [spec_instances.instance_id],
-        references: [instances.id],
-    }),
 }));
 
 export const report_itemsRelations = relations(report_items, ({ one }) => ({

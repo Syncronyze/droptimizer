@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@components/ui';
 
 export default function CustomAlert({ show, error, description }) {
     return (

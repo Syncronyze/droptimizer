@@ -1,52 +1,54 @@
-
-CREATE VIEW public.item_detail_view AS
- WITH item_dps AS (
-         SELECT items.id AS item_id,
-            items.source_item_id,
-            COALESCE(items.source_item_id, items.id) AS effective_item_id,
-                CASE
-                    WHEN (items.source_item_id IS NOT NULL) THEN true
-                    ELSE false
-                END AS is_source_item,
-            report_items.encounter_id,
-            report_items.ilvl,
-            reports_1.difficulty,
-            report_items.dps,
-            reports_1.char_id,
-            reports_1.spec_id,
-            reports_1.id AS report_id,
-            items.slot AS item_slot,
-            row_number() OVER (PARTITION BY reports_1.char_id, reports_1.spec_id, COALESCE(items.source_item_id, items.id), report_items.encounter_id, reports_1.difficulty, report_items.ilvl,
-                CASE
-                    WHEN (items.source_item_id IS NOT NULL) THEN true
-                    ELSE false
-                END ORDER BY report_items.dps DESC) AS rn
-           FROM ((public.report_items
-             JOIN public.items ON ((items.id = report_items.item_id)))
-             JOIN public.reports reports_1 ON ((reports_1.id = report_items.report_id)))
-        ), max_dps_subquery AS (
-         SELECT reports_1.char_id,
-            reports_1.spec_id,
-            items.slot AS item_slot,
-            max(report_items.dps) AS max_dps
-           FROM ((public.report_items
-             JOIN public.reports reports_1 ON ((reports_1.id = report_items.report_id)))
-             JOIN public.items ON (((items.id = report_items.item_id))))
-          GROUP BY reports_1.char_id, reports_1.spec_id, items.slot
-        )
- SELECT characters.id AS character_id,
-    characters.name,
-    characters.server,
-    characters.class,
-    item_dps.effective_item_id,
-    item_dps.is_source_item,
-    item_dps.encounter_id,
-    item_dps.difficulty,
-    json_agg(json_build_object('name', specs.name, 'icon', specs.icon, 'url', reports.url, 'ilvl', reports.avg_ilvl, 'ilvl_equip', reports.avg_ilvl_equip, 'item_gain', item_dps.dps, 'bis_gain', max_dps_subquery.max_dps, 'item_dec', (item_dps.dps / reports.dps), 'bis_dec', (max_dps_subquery.max_dps / reports.dps), 'is_bis', (item_dps.dps = max_dps_subquery.max_dps))) AS spec_dps
-   FROM ((((item_dps
-     JOIN public.reports ON ((reports.id = item_dps.report_id)))
-     JOIN public.characters ON ((characters.id = item_dps.char_id)))
-     JOIN public.specs ON ((specs.id = item_dps.spec_id)))
-     JOIN max_dps_subquery ON (((max_dps_subquery.char_id = item_dps.char_id) AND (max_dps_subquery.spec_id = item_dps.spec_id) AND (max_dps_subquery.item_slot = item_dps.item_slot))))
-  WHERE (item_dps.rn = 1)
-  GROUP BY characters.id, characters.name, characters.server, characters.class, item_dps.effective_item_id, item_dps.is_source_item, item_dps.encounter_id, item_dps.difficulty;
+create view item_detail_view as
+  with bis_list as (
+    select
+      report_id,
+      slot,
+      item_id as bis_item_id,
+      encounter_id as bis_encounter_id,
+      item_dps as bis_gain,
+      item_dps / dps as bis_gain_dec
+    from (
+      select
+        r.id as report_id,
+        ri.item_id,
+        ri.encounter_id,
+        ri.slot,
+        ri.dps as item_dps,
+        r.dps,
+        row_number() over (partition by r.id, ri.slot order by ri.dps desc) as rn
+      from report_items ri
+      left join reports r on ri.report_id = r.id
+    )
+    where rn = 1
+  )
+  select
+    c.name as character_name,
+    c.server as character_server,
+    c.class as character_class,
+    ri.item_id,
+    ri.encounter_id,
+    r.difficulty,
+    ri.slot,
+    json_agg(
+      json_build_object(
+        'name', s.name, 
+        'icon', s.icon, 
+        'url', r.url, 
+    	'source', ri.source,
+        'ilvl', r.avg_ilvl, 
+        'ilvl_equip', r.avg_ilvl_equip, 
+        'dps_gain', ri.dps,
+        'dps_gain_dec', ri.dps / r.dps,
+        'bis_item_id', bl.bis_item_id,
+        'bis_encounter_id', bl.bis_encounter_id,
+        'bis_gain', bl.bis_gain,
+        'bis_gain_dec', bl.bis_gain_dec
+    )
+  ) AS spec_dps
+  from report_items ri
+  left join items i on ri.item_id = i.id
+  left join reports r on ri.report_id = r.id
+  left join characters c on r.char_id = c.id
+  left join specs s on r.spec_id = s.id
+  left join bis_list bl on bl.report_id = r.id and bl.slot = ri.slot
+  group by c.name, c.server, c.class, ri.item_id, ri.encounter_id, r.difficulty, ri.slot

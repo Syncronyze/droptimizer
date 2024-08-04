@@ -8,14 +8,14 @@ export default async function handler(req, res) {
         return;
     }
 
-    const { item, encounter, difficulty, source } = req.query;
+    const { item, encounter, difficulty } = req.query;
     if (!item || !encounter || !difficulty) {
         res.status(405).json({ error: 'Invalid parameters' });
         return;
     }
 
     try {
-        const items = await selectItems(item, encounter, difficulty, source === 'true');
+        const items = await selectItems(item, encounter, difficulty);
         res.status(200).json(items);
     } catch (err) {
         console.error(err);
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     }
 }
 
-const selectItems = async (item, encounter, difficulty, source) => {
+const selectItems = async (item, encounter, difficulty) => {
     const query = db
         .select()
         .from(item_detail_view)
@@ -32,8 +32,7 @@ const selectItems = async (item, encounter, difficulty, source) => {
             and(
                 eq(item_detail_view.difficulty, difficulty),
                 eq(item_detail_view.encounter_id, encounter),
-                eq(item_detail_view.item_id, item),
-                eq(item_detail_view.is_source_item, source),
+                eq(item_detail_view.id, item),
             ),
         );
     const items = await query.execute();

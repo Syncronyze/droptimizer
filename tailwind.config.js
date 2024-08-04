@@ -13,8 +13,8 @@ module.exports = {
         },
         extend: {
             colors: {
-                dk: '#C41E3A',
-                dh: '#A330C9',
+                death_knight: '#C41E3A',
+                demon_hunter: '#A330C9',
                 druid: '#FF7C0A',
                 evoker: '#33937F',
                 hunter: '#AAD372',
@@ -86,7 +86,7 @@ module.exports = {
             animation: {
                 'accordion-down': 'accordion-down 0.2s ease-out',
                 'accordion-up': 'accordion-up 0.2s ease-out',
-                'collapsible-down': 'collapsible-down 0.2s ease-out',
+                'collapsible-down': 'collapsible-down 0.2s ease-out 0.2s',
                 'collapsible-up': 'collapsible-up 0.2s ease-out',
             },
         },

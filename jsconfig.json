@@ -3,7 +3,7 @@
         "paths": {
             "@*": ["./src/*"],
             "@tables": ["./drizzle/schema.js"],
-            "@db": ["./drizzle/db.js"]
+            "@db": ["./drizzle/db.js"],
         }
     }
 }

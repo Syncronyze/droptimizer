@@ -3,14 +3,14 @@ import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
-} from '@components/ui/dropdown-menu';
+    DropdownMenuTrigger,
+    Skeleton,
+} from '@components/ui';
 import { defaultFetch } from '@lib/react-query';
-import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { ChevronDownIcon } from 'lucide-react';
 import React, { useContext, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Skeleton } from '@components/ui/skeleton';
-import { NavContext } from '@components/custom/nav-context';
+import { NavContext } from '@components';
 
 export default function InstanceNav() {
     const { navState, updateNavState } = useContext(NavContext);
