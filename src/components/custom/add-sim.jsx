@@ -1,6 +1,6 @@
 import { Button, Input, Label, Popover, PopoverContent, PopoverTrigger } from '@components/ui';
 import React, { useState } from 'react';
-import { PlusCircleIcon, RefreshCwIcon } from 'lucide-react';
+import { PlusCircleIcon } from 'lucide-react';
 import { CustomAlert, Spinner } from '@components';
 
 const URL_REGEX = /[1-9A-z]{22}/;
@@ -56,7 +56,10 @@ export default function AddSimForm() {
             <PopoverContent asChild>
                 <div className='w-auto items-center gap-1.5'>
                     <Label htmlFor='url'>Sim URL</Label>
-                    <form className='flex flex-row gap-x-4 justify-center items-center mt-2 mb-4' onSubmit={onSubmit}>
+                    <form
+                        className='flex flex-row gap-x-4 justify-center items-center mt-2 mb-4'
+                        onSubmit={onSubmit}
+                    >
                         <Input
                             onChange={(e) => {
                                 setValue(e.target.value);
